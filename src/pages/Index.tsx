@@ -19,20 +19,18 @@ const Index = () => {
       setStatus("processing");
       setProgress(0);
       
-      const worker = await createWorker({
-        logger: m => {
-          if (m.progress !== undefined && m.status === 'recognizing text') {
-            setProgress(Math.round(m.progress * 100));
-          }
+      const worker = createWorker();
+      await (await worker).load();
+      await (await worker).loadLanguage("eng");
+      await (await worker).initialize("eng");
+      
+      const { data } = await (await worker).recognize(file, {
+        progress: (p: number) => {
+          setProgress(Math.round(p * 100));
         }
       });
 
-      await worker.load();
-      await worker.loadLanguage('eng');
-      await worker.reinitialize('eng');
-      
-      const { data } = await worker.recognize(file);
-      await worker.terminate();
+      await (await worker).terminate();
 
       const extractedData: ExtractedData = {
         raw: data.text,
