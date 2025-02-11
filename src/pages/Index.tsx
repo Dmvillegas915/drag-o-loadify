@@ -19,27 +19,33 @@ const Index = () => {
       setStatus("processing");
       setProgress(0);
       
-      // Create and initialize worker in one step
+      // Create URL from file
+      const imageUrl = URL.createObjectURL(file);
+      
+      // Create and initialize worker
       const worker = await createWorker("eng");
       
-      // Perform OCR
-      const { data } = await worker.recognize(file);
+      try {
+        // Perform OCR using the image URL
+        const { data } = await worker.recognize(imageUrl);
 
-      // Clean up
-      await worker.terminate();
+        const extractedData: ExtractedData = {
+          raw: data.text,
+          parsedData: {
+            timestamp: new Date().toISOString(),
+            filename: file.name,
+            size: file.size,
+          }
+        };
 
-      const extractedData: ExtractedData = {
-        raw: data.text,
-        parsedData: {
-          timestamp: new Date().toISOString(),
-          filename: file.name,
-          size: file.size,
-        }
-      };
-
-      setExtractedData(extractedData);
-      setStatus("complete");
-      toast.success("Document processed successfully");
+        setExtractedData(extractedData);
+        setStatus("complete");
+        toast.success("Document processed successfully");
+      } finally {
+        // Clean up
+        await worker.terminate();
+        URL.revokeObjectURL(imageUrl);
+      }
     } catch (error) {
       console.error("Processing error:", error);
       setStatus("error");
