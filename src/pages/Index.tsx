@@ -19,18 +19,17 @@ const Index = () => {
       setStatus("processing");
       setProgress(0);
       
-      const worker = createWorker();
-      await (await worker).load();
-      await (await worker).loadLanguage("eng");
-      await (await worker).initialize("eng");
+      const worker = await createWorker();
       
-      const { data } = await (await worker).recognize(file, {
-        progress: (p: number) => {
-          setProgress(Math.round(p * 100));
-        }
-      });
+      // Initialize worker
+      await worker.loadLanguage("eng");
+      await worker.reinitialize("eng");
+      
+      // Perform OCR
+      const { data } = await worker.recognize(file);
 
-      await (await worker).terminate();
+      // Clean up
+      await worker.terminate();
 
       const extractedData: ExtractedData = {
         raw: data.text,
