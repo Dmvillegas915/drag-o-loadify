@@ -19,21 +19,19 @@ const Index = () => {
       setStatus("processing");
       setProgress(0);
       
-      const worker = await createWorker({
-        logger: m => {
-          if (m.status === 'recognizing text') {
-            setProgress(Math.round(Number(m.progress) * 100));
-          }
+      const worker = await createWorker(['eng']);
+
+      // Use direct recognition which includes language loading
+      const { data: { text } } = await worker.recognize(file, {
+        progress: (p: number) => {
+          setProgress(Math.round(p * 100));
         }
       });
-
-      await worker.loadLanguage('eng');
-      await worker.initialize('eng');
-      const { data } = await worker.recognize(file);
+      
       await worker.terminate();
 
       const extractedData: ExtractedData = {
-        raw: data.text,
+        raw: text,
         parsedData: {
           timestamp: new Date().toISOString(),
           filename: file.name,
