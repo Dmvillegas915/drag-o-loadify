@@ -19,15 +19,16 @@ const Index = () => {
       setStatus("processing");
       setProgress(0);
       
-      const worker = await createWorker("eng");
-
-      // Subscribe to progress updates
-      worker.subscribe(info => {
-        if (info.status === 'recognizing text') {
-          setProgress(Math.round(Number(info.progress) * 100));
+      const worker = await createWorker({
+        logger: m => {
+          if (m.status === 'recognizing text') {
+            setProgress(Math.round(Number(m.progress) * 100));
+          }
         }
       });
 
+      await worker.loadLanguage('eng');
+      await worker.initialize('eng');
       const { data } = await worker.recognize(file);
       await worker.terminate();
 
