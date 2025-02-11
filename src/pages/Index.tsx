@@ -1,7 +1,7 @@
 
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { createWorker } from "tesseract.js";
+import { createWorker, Worker } from "tesseract.js";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -19,21 +19,22 @@ const Index = () => {
       setStatus("processing");
       setProgress(0);
       
-      const worker = await createWorker({
-        logger: m => {
-          if (m.status === 'recognizing text') {
-            setProgress(Math.round(Number(m.progress) * 100));
-          }
+      const worker = await createWorker();
+      await worker.load();
+      await worker.loadLanguage('eng');
+      await worker.reinitialize('eng');
+
+      worker.setProgressHandler((p: any) => {
+        if (p.status === 'recognizing text') {
+          setProgress(Math.round(Number(p.progress) * 100));
         }
       });
 
-      await worker.loadLanguage('eng');
-      await worker.initialize('eng');
-      const { data: { text } } = await worker.recognize(file);
+      const { data } = await worker.recognize(file);
       await worker.terminate();
 
       const extractedData: ExtractedData = {
-        raw: text,
+        raw: data.text,
         parsedData: {
           timestamp: new Date().toISOString(),
           filename: file.name,
