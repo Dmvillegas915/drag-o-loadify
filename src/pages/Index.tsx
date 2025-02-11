@@ -1,7 +1,7 @@
 
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { createWorker } from "tesseract.js";
+import { createWorker, CreateWorkerOptions } from "tesseract.js";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -19,15 +19,14 @@ const Index = () => {
       setStatus("processing");
       setProgress(0);
       
-      const worker = await createWorker({
-        logger: m => {
-          if (m.status === 'recognizing text') {
-            setProgress(parseInt(m.progress.toString()) * 100);
-          }
+      const worker = await createWorker('eng');
+      
+      worker.progress(p => {
+        if (p.status === 'recognizing text') {
+          setProgress(Math.round(p.progress * 100));
         }
       });
 
-      // In newer versions of Tesseract.js, we don't need to explicitly load or initialize
       const { data: { text } } = await worker.recognize(file);
       await worker.terminate();
 
