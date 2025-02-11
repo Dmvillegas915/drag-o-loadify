@@ -19,11 +19,8 @@ const Index = () => {
       setStatus("processing");
       setProgress(0);
       
-      const worker = await createWorker();
-      
-      // Initialize worker
-      await worker.loadLanguage("eng");
-      await worker.reinitialize("eng");
+      // Create and initialize worker in one step
+      const worker = await createWorker("eng");
       
       // Perform OCR
       const { data } = await worker.recognize(file);
