@@ -23,12 +23,12 @@ const DragDropZone = ({ onDrop, status }: DragDropZoneProps) => {
     <div
       {...getRootProps()}
       className={cn(
-        "border-2 border-dashed rounded-lg p-12 transition-all duration-200 ease-in-out cursor-pointer",
+        "border-2 border-dashed rounded-lg p-8 transition-all duration-200 ease-in-out cursor-pointer",
         {
-          "border-gray-300 bg-gray-50": !isDragActive && status === "idle",
-          "border-blue-400 bg-blue-50": isDragActive,
+          "border-sky-200 bg-sky-50": !isDragActive && status === "idle",
+          "border-sky-500 bg-sky-50": isDragActive,
           "border-green-400 bg-green-50": status === "complete",
-          "border-yellow-400 bg-yellow-50": status === "processing",
+          "border-sky-500 bg-sky-50/70": status === "processing",
           "border-red-400 bg-red-50": status === "error",
         }
       )}
@@ -37,9 +37,9 @@ const DragDropZone = ({ onDrop, status }: DragDropZoneProps) => {
       <div className="flex flex-col items-center justify-center space-y-4 text-center">
         {status === "idle" && (
           <>
-            <Upload className="w-12 h-12 text-gray-400" />
+            <Upload className="w-10 h-10 text-sky-500" />
             <div className="space-y-1">
-              <p className="text-gray-600">
+              <p className="text-gray-900 font-medium">
                 {isDragActive ? "Drop your document here" : "Drag & drop your document here"}
               </p>
               <p className="text-sm text-gray-500">or click to select a file</p>
@@ -49,22 +49,22 @@ const DragDropZone = ({ onDrop, status }: DragDropZoneProps) => {
 
         {status === "processing" && (
           <>
-            <FileText className="w-12 h-12 text-yellow-500 animate-pulse" />
-            <p className="text-yellow-600">Processing your document...</p>
+            <FileText className="w-10 h-10 text-sky-500 animate-pulse" />
+            <p className="text-gray-900 font-medium">Processing your document...</p>
           </>
         )}
 
         {status === "complete" && (
           <>
-            <Check className="w-12 h-12 text-green-500" />
-            <p className="text-green-600">Document processed successfully</p>
+            <Check className="w-10 h-10 text-green-500" />
+            <p className="text-green-600 font-medium">Document processed successfully</p>
           </>
         )}
 
         {status === "error" && (
           <>
-            <AlertCircle className="w-12 h-12 text-red-500" />
-            <p className="text-red-600">Error processing document</p>
+            <AlertCircle className="w-10 h-10 text-red-500" />
+            <p className="text-red-600 font-medium">Error processing document</p>
           </>
         )}
       </div>

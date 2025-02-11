@@ -19,26 +19,17 @@ const Index = () => {
       setStatus("processing");
       setProgress(0);
       
-      const worker = await createWorker({
-        logger: (m) => {
-          if (m.status === "recognizing text") {
-            setProgress(Math.round(m.progress * 100));
-          }
-        },
-      });
-
-      await worker.loadLanguage("eng");
-      await worker.initialize("eng");
+      const worker = await createWorker();
+      await worker.load();
+      await worker.loadLanguage('eng');
+      await worker.initialize('eng');
       
       const { data: { text } } = await worker.recognize(file);
       await worker.terminate();
 
-      // Here you would implement your parsing logic for the TMS application
-      // This is a simplified example
       const extractedData: ExtractedData = {
         raw: text,
         parsedData: {
-          // Add your specific parsing logic here
           timestamp: new Date().toISOString(),
           filename: file.name,
           size: file.size,
@@ -68,16 +59,26 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 px-4 py-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-semibold text-gray-900">Document Processing Portal</h1>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Drag and drop your emails or documents to automatically create trucking loads
-          </p>
+    <div className="min-h-screen bg-sky-50 px-4 py-8">
+      <div className="max-w-6xl mx-auto space-y-8">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-semibold text-gray-900">Document Processing</h1>
+          <button className="bg-sky-500 text-white px-6 py-2 rounded-md hover:bg-sky-600 transition-colors">
+            Create Load
+          </button>
         </div>
 
-        <Card className="p-8">
+        <Card className="p-8 bg-white shadow-sm border-sky-200">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-sky-500 flex items-center justify-center">
+              <span className="text-white text-sm">AI</span>
+            </div>
+            <div>
+              <h2 className="text-lg font-medium text-gray-900">Dispatch Assist</h2>
+              <p className="text-sm text-gray-500">Let PCS book your loads</p>
+            </div>
+          </div>
+
           <DragDropZone 
             onDrop={onDrop} 
             status={status} 
@@ -85,11 +86,11 @@ const Index = () => {
 
           {status === "processing" && (
             <div className="mt-6 space-y-2">
-              <div className="flex justify-between text-sm text-gray-600">
+              <div className="flex justify-between text-sm text-gray-500">
                 <span>Processing document...</span>
                 <span>{progress}%</span>
               </div>
-              <Progress value={progress} />
+              <Progress value={progress} className="h-2" />
             </div>
           )}
 
