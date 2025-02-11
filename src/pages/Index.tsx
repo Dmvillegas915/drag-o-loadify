@@ -15,19 +15,36 @@ const Index = () => {
   const [extractedData, setExtractedData] = useState<ExtractedData | null>(null);
 
   const processDocument = async (file: File) => {
+    let imageUrl: string | null = null;
+    
     try {
       setStatus("processing");
       setProgress(0);
       
-      // Create URL from file
-      const imageUrl = URL.createObjectURL(file);
+      // Create URL and load image first
+      imageUrl = URL.createObjectURL(file);
+      
+      // Create a promise to load the image
+      const loadImage = new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error('Failed to load image'));
+        img.src = imageUrl!;
+      });
+
+      // Wait for image to load
+      await loadImage;
+      console.log('Image loaded successfully');
       
       // Create and initialize worker
       const worker = await createWorker("eng");
+      console.log('Worker initialized');
       
       try {
+        console.log('Starting OCR process');
         // Perform OCR using the image URL
         const { data } = await worker.recognize(imageUrl);
+        console.log('OCR completed', data);
 
         const extractedData: ExtractedData = {
           raw: data.text,
@@ -44,12 +61,16 @@ const Index = () => {
       } finally {
         // Clean up
         await worker.terminate();
-        URL.revokeObjectURL(imageUrl);
       }
     } catch (error) {
       console.error("Processing error:", error);
       setStatus("error");
       toast.error("Failed to process document");
+    } finally {
+      // Clean up URL in final finally block
+      if (imageUrl) {
+        URL.revokeObjectURL(imageUrl);
+      }
     }
   };
 
@@ -57,11 +78,12 @@ const Index = () => {
     if (acceptedFiles.length === 0) return;
     
     const file = acceptedFiles[0];
-    if (file.type !== "application/pdf" && !file.type.startsWith("image/")) {
-      toast.error("Please upload a PDF or image file");
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
       return;
     }
 
+    console.log('Processing file:', file.name, 'Type:', file.type);
     processDocument(file);
   }, []);
 
