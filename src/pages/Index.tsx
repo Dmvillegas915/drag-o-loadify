@@ -19,11 +19,15 @@ const Index = () => {
       setStatus("processing");
       setProgress(0);
       
-      const worker = await createWorker();
-      await worker.load();
-      await worker.loadLanguage('eng');
-      await worker.initialize('eng');
-      
+      const worker = await createWorker({
+        logger: m => {
+          if (m.status === 'recognizing text') {
+            setProgress(parseInt(m.progress.toString()) * 100);
+          }
+        }
+      });
+
+      // In newer versions of Tesseract.js, we don't need to explicitly load or initialize
       const { data: { text } } = await worker.recognize(file);
       await worker.terminate();
 
